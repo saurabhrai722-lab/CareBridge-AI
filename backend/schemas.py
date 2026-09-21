@@ -33,3 +33,19 @@ class ReferralResponse(ReferralBase):
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+class ReferralEventResponse(BaseModel):
+    id: int
+    referral_id: int
+    event: str
+    note: Optional[str] = None
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class ReferralDetailResponse(ReferralResponse):
+    patient: PatientResponse
+    events: list[ReferralEventResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+class ReferralStatusUpdate(BaseModel):
+    status: str
