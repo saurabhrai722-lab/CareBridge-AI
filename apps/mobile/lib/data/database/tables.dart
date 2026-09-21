@@ -23,3 +23,15 @@ class Referrals extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
+
+class SyncQueue extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get operationType => text()();
+  TextColumn get payload => text()();
+  TextColumn get referenceId => text()();
+  TextColumn get status => text().withDefault(const Constant('PENDING'))();
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
+  TextColumn get errorMessage => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+}

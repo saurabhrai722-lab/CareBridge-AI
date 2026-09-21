@@ -39,6 +39,8 @@ dependencies:
   sqlite3: ^2.4.6
   path_provider: ^2.1.2
   path: ^1.8.3
+  http: ^1.6.0
+  connectivity_plus: ^7.3.1
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +48,7 @@ dev_dependencies:
 
   drift_dev: ^2.14.1
   build_runner: ^2.4.8
+  mocktail: ^1.0.5
 
 dependency_overrides:
   path_provider_foundation: 2.3.2

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:sqlite3/sqlite3.dart';
 import '../../core/utils/referral_code_generator.dart';
@@ -46,6 +47,30 @@ class ReferralRepository {
       }
 
       final savedPatient = await (_db.select(_db.patients)..where((p) => p.id.equals(patientId))).getSingle();
+      
+      final payload = jsonEncode({
+        "patient": {
+          "name": savedPatient.name,
+          "phone": savedPatient.phone,
+          "date_of_birth": savedPatient.dateOfBirth,
+          "gender": savedPatient.gender,
+          "village": savedPatient.village,
+          "guardian_name": savedPatient.guardianName,
+        },
+        "referral": {
+          "referral_code": savedReferral.referralCode,
+          "referring_facility": savedReferral.referringFacility,
+          "receiving_facility": savedReferral.receivingFacility,
+          "referral_reason": savedReferral.reason,
+        }
+      });
+
+      await _db.into(_db.syncQueue).insert(SyncQueueCompanion.insert(
+        operationType: 'CREATE_REFERRAL',
+        payload: payload,
+        referenceId: savedReferral.referralCode,
+      ));
+
       return ReferralWithPatient(savedReferral, savedPatient);
     });
   }

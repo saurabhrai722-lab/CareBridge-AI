@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import '../../data/repositories/referral_repository.dart';
+import '../../core/services/sync_service.dart';
 import 'referral_create_screen.dart';
 import 'referral_detail_screen.dart';
 
 class ReferralListScreen extends StatelessWidget {
   final ReferralRepository repository;
+  final SyncService syncService;
 
-  const ReferralListScreen({super.key, required this.repository});
+  const ReferralListScreen({super.key, required this.repository, required this.syncService});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Offline Referrals')),
+      appBar: AppBar(
+        title: const Text('Offline Referrals'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sync),
+            onPressed: () {
+              syncService.syncAll();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Syncing...')),
+              );
+            },
+          ),
+        ],
+      ),
       body: StreamBuilder<List<ReferralWithPatient>>(
         stream: repository.watchReferrals(),
         builder: (context, snapshot) {
