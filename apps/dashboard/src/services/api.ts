@@ -131,3 +131,8 @@ export async function extractOCR(file: File) {
   });
   return response.data;
 };
+
+export const dischargeReferral = async (referral_code: string, note: string): Promise<Referral> => {
+  const response = await api.post(`/api/v1/referrals/${referral_code}/discharge`, { note });
+  return response.data;
+};

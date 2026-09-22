@@ -119,3 +119,6 @@ class OCRResponse(BaseModel):
     fields: OCRFields
     detail: Optional[str] = None
 
+# Phase 11 Schemas
+class DischargeRequest(BaseModel):
+    note: str

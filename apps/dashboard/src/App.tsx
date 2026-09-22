@@ -15,6 +15,7 @@ import { IdentityReconciliation } from './components/IdentityReconciliation';
 import { ReadmissionRisk } from './components/ReadmissionRisk';
 import { OverdueReferrals } from './components/OverdueReferrals';
 import { OCRVerification } from './components/OCRVerification';
+import { DischargeModal } from './components/DischargeModal';
 
 const STATUS_COLORS: Record<string, string> = {
   CREATED: 'bg-yellow-500/20 text-yellow-300',
@@ -195,6 +196,7 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
   const [error, setError] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
   const [submittingNote, setSubmittingNote] = useState(false);
+  const [showDischarge, setShowDischarge] = useState(false);
 
   const availableStatuses = VALID_TRANSITIONS[referral.status] || [];
 
@@ -312,8 +314,8 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
               {availableStatuses.length > 0 ? (
                 <>
                   <span className="text-slate-500">→</span>
-                  <div className="flex gap-2 flex-wrap">
-                    {availableStatuses.map(s => (
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {availableStatuses.filter(s => s !== 'DISCHARGED').map(s => (
                       <button
                         key={s}
                         disabled={updating}
@@ -323,6 +325,14 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
                         Set {s.replace('_', ' ')}
                       </button>
                     ))}
+                    {referral.status === 'ADMITTED' && (
+                      <button
+                        onClick={() => setShowDischarge(true)}
+                        className="px-5 py-2 rounded-xl text-sm font-bold bg-teal-600 hover:bg-teal-500 text-white transition-all hover:scale-105 hover:shadow-lg shadow-teal-500/20"
+                      >
+                        Discharge Patient
+                      </button>
+                    )}
                   </div>
                 </>
               ) : (
@@ -385,6 +395,17 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
 
         </div>
       </div>
+      
+      {showDischarge && (
+        <DischargeModal
+          referral={referral}
+          onClose={() => setShowDischarge(false)}
+          onSuccess={() => {
+            setShowDischarge(false);
+            onStatusUpdated();
+          }}
+        />
+      )}
     </div>
   );
 }

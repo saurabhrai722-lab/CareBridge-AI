@@ -160,6 +160,39 @@ def add_referral_event(referral_code: str, event_create: ReferralEventCreate, db
         
     return event
 
+from backend.schemas import DischargeRequest
+
+@app.post("/api/v1/referrals/{referral_code}/discharge", response_model=ReferralDetailResponse)
+def discharge_referral(referral_code: str, req: DischargeRequest, db: Session = Depends(get_db)):
+    referral = db.query(Referral).filter(Referral.referral_code == referral_code).first()
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    if not req.note.strip():
+        raise HTTPException(status_code=400, detail="Discharge note cannot be empty")
+
+    current_status = referral.status
+    if current_status != ReferralStatus.ADMITTED:
+        raise HTTPException(status_code=400, detail=f"Invalid transition from {current_status.value} to DISCHARGED")
+
+    referral.status = ReferralStatus.DISCHARGED
+    
+    event = ReferralEvent(
+        referral_id=referral.id,
+        event="DISCHARGED",
+        note=req.note.strip()
+    )
+    db.add(event)
+
+    try:
+        db.commit()
+        db.refresh(referral)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database update failed")
+        
+    return referral
+
 @app.patch("/api/v1/referrals/{referral_code}", response_model=ReferralDetailResponse)
 def update_referral_status(referral_code: str, update: ReferralStatusUpdate, db: Session = Depends(get_db)):
     referral = db.query(Referral).filter(Referral.referral_code == referral_code).first()
