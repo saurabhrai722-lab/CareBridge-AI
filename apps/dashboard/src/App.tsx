@@ -12,6 +12,7 @@ import {
   X
 } from 'lucide-react';
 import { IdentityReconciliation } from './components/IdentityReconciliation';
+import { ReadmissionRisk } from './components/ReadmissionRisk';
 
 const STATUS_COLORS: Record<string, string> = {
   CREATED: 'bg-yellow-500/20 text-yellow-300',
@@ -271,6 +272,14 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
               <User className="w-4 h-4" /> Identity Reconciliation
             </h3>
             <IdentityReconciliation referral={referral} />
+          </section>
+
+          {/* AI Risk Analysis (Phase 7) */}
+          <section>
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Activity className="w-4 h-4" /> AI Risk Analysis
+            </h3>
+            <ReadmissionRisk referral={referral} />
           </section>
 
           {/* Action Area */}

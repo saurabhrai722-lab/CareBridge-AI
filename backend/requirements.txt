@@ -5,3 +5,7 @@ sqlalchemy
 alembic
 pytest
 rapidfuzz
+scikit-learn
+pandas
+shap
+joblib

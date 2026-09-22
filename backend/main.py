@@ -274,3 +274,19 @@ def reconcile_patient(referral_code: str, req: ReconciliationRequest, db: Sessio
         raise HTTPException(status_code=400, detail="Database integrity error during reconciliation")
         
     return {"status": "success", "action": req.action, "candidate_id": candidate_patient.id}
+
+from backend.schemas import ReadmissionRiskRequest, ReadmissionRiskResponse
+from backend.ml.predict import predict_readmission_risk
+
+@app.post("/api/v1/predictions/readmission-risk", response_model=ReadmissionRiskResponse)
+def get_readmission_risk(req: ReadmissionRiskRequest):
+    features_dict = {
+        "age": req.age,
+        "gender": req.gender,
+        "referral_reason_category": req.referral_reason_category,
+        "prior_admissions_count": req.prior_admissions_count,
+        "comorbidity_count": req.comorbidity_count
+    }
+    
+    result = predict_readmission_risk(features_dict)
+    return result

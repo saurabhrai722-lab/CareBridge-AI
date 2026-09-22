@@ -81,3 +81,32 @@ export const reconcilePatient = async (referral_code: string, candidate_patient_
     action
   });
 };
+
+export interface ShapExplanation {
+  feature: string;
+  contribution: number;
+  description: string;
+}
+
+export interface ReadmissionRiskResponse {
+  status: string;
+  missing_features?: string[];
+  detail?: string;
+  risk_score?: number;
+  risk_category?: string;
+  base_value?: number;
+  shap_values?: ShapExplanation[];
+}
+
+export interface ReadmissionRiskRequest {
+  age?: number;
+  gender?: string;
+  referral_reason_category?: string;
+  prior_admissions_count?: number;
+  comorbidity_count?: number;
+}
+
+export const getReadmissionRisk = async (payload: ReadmissionRiskRequest): Promise<ReadmissionRiskResponse> => {
+  const response = await api.post('/api/v1/predictions/readmission-risk', payload);
+  return response.data;
+};

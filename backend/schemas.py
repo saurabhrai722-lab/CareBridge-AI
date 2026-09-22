@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, List, Literal
 from datetime import datetime
 
 class PatientBase(BaseModel):
@@ -69,4 +69,26 @@ class MatchCandidateResponse(BaseModel):
 
 class ReconciliationRequest(BaseModel):
     candidate_patient_id: int
-    action: str # "CONFIRM" or "REJECT"
+    action: Literal['CONFIRM', 'REJECT']
+
+# Phase 7 Schemas
+class ReadmissionRiskRequest(BaseModel):
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    referral_reason_category: Optional[str] = None
+    prior_admissions_count: Optional[int] = None
+    comorbidity_count: Optional[int] = None
+
+class ShapExplanation(BaseModel):
+    feature: str
+    contribution: float
+    description: str
+
+class ReadmissionRiskResponse(BaseModel):
+    status: str
+    missing_features: Optional[List[str]] = None
+    detail: Optional[str] = None
+    risk_score: Optional[float] = None
+    risk_category: Optional[str] = None
+    base_value: Optional[float] = None
+    shap_values: Optional[List[ShapExplanation]] = None
