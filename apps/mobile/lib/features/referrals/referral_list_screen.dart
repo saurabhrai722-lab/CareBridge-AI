@@ -46,9 +46,12 @@ class ReferralListScreen extends StatelessWidget {
             itemCount: referrals.length,
             itemBuilder: (context, index) {
               final item = referrals[index];
+              final hasOutcome = item.referral.outcomeNote != null;
+              final outcomeText = hasOutcome ? ' \nOutcome: Hospital updated' : '';
+              
               return ListTile(
                 title: Text('${item.patient.name} (${item.referral.referralCode})'),
-                subtitle: Text('${item.referral.referringFacility} -> ${item.referral.receivingFacility} \nStatus: ${item.referral.status}'),
+                subtitle: Text('${item.referral.referringFacility} -> ${item.referral.receivingFacility} \nStatus: ${item.referral.status}$outcomeText'),
                 onTap: () {
                   Navigator.push(
                     context,

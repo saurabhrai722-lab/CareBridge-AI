@@ -11,7 +11,8 @@ from backend.models import Patient, Referral, ReferralStatus, ReferralEvent
 from backend.schemas import (
     ReferralSyncPayload, 
     ReferralResponse, 
-    ReferralDetailResponse, 
+    ReferralDetailResponse,
+    ReferralOutcomeResponse,
     ReferralStatusUpdate,
     ReferralEventCreate,
     ReferralEventResponse
@@ -121,6 +122,24 @@ def get_referral(referral_code: str, db: Session = Depends(get_db)):
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
     return referral
+
+@app.get("/api/v1/referrals/{referral_code}/outcome", response_model=ReferralOutcomeResponse)
+def get_referral_outcome(referral_code: str, db: Session = Depends(get_db)):
+    referral = db.query(Referral).filter(Referral.referral_code == referral_code).first()
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+        
+    outcome_event = db.query(ReferralEvent).filter(
+        ReferralEvent.referral_id == referral.id,
+        ReferralEvent.event.in_(["DISCHARGED", "COMPLETED"])
+    ).order_by(ReferralEvent.created_at.desc()).first()
+    
+    return ReferralOutcomeResponse(
+        referral_code=referral.referral_code,
+        status=referral.status.value,
+        latest_update_time=referral.updated_at,
+        outcome_note=outcome_event.note if outcome_event else None
+    )
 
 # Define valid transitions dictionary
 VALID_TRANSITIONS = {

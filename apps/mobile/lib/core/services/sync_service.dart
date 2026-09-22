@@ -47,6 +47,35 @@ class SyncService {
         }
         await _syncItem(item);
       }
+
+      // Fetch outcomes for existing referrals
+      final existingReferrals = await _db.select(_db.referrals).get();
+      for (final ref in existingReferrals) {
+        // Skip fetching outcome for referrals that haven't been pushed
+        if (ref.status == 'CREATED') {
+          continue;
+        }
+        // Skip fetching if already in final state locally
+        if (ref.status == 'COMPLETED') {
+          continue;
+        }
+
+        try {
+          final outcomeRes = await _apiClient.get('/api/v1/referrals/${ref.referralCode}/outcome');
+          final remoteStatus = outcomeRes['status'];
+          final outcomeNote = outcomeRes['outcome_note'];
+          
+          if (remoteStatus != ref.status || outcomeNote != ref.outcomeNote) {
+            await (_db.update(_db.referrals)..where((t) => t.id.equals(ref.id)))
+                .write(ReferralsCompanion(
+                    status: Value(remoteStatus),
+                    outcomeNote: Value(outcomeNote),
+                    updatedAt: Value(DateTime.now())));
+          }
+        } catch (e) {
+          // ignore API errors for outcome fetch (e.g., 404 if not found)
+        }
+      }
     } finally {
       _isSyncing = false;
     }

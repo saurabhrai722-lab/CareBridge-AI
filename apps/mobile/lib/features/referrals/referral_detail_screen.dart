@@ -20,6 +20,10 @@ class ReferralDetailScreen extends StatelessWidget {
           Text(ref.status, style: const TextStyle(fontSize: 16)),
           const Divider(),
           
+          const Text('Hospital Outcome', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(ref.outcomeNote ?? 'Awaiting hospital outcome', style: const TextStyle(fontSize: 16)),
+          const Divider(),
+          
           const Text('Patient Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ListTile(title: const Text('Name'), subtitle: Text(pat.name)),
           ListTile(title: const Text('Phone'), subtitle: Text(pat.phone ?? 'N/A')),

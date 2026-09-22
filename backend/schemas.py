@@ -51,6 +51,14 @@ class ReferralDetailResponse(ReferralResponse):
     events: list[ReferralEventResponse] = []
     model_config = ConfigDict(from_attributes=True)
 
+class ReferralOutcomeResponse(BaseModel):
+    referral_code: str
+    status: str
+    latest_update_time: datetime
+    outcome_note: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ReferralStatusUpdate(BaseModel):
     status: str
 

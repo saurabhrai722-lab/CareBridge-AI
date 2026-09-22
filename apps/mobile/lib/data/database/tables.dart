@@ -20,6 +20,7 @@ class Referrals extends Table {
   TextColumn get receivingFacility => text()();
   TextColumn get reason => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('CREATED'))();
+  TextColumn get outcomeNote => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

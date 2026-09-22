@@ -643,6 +643,17 @@ class $ReferralsTable extends Referrals
     requiredDuringInsert: false,
     defaultValue: const Constant('CREATED'),
   );
+  static const VerificationMeta _outcomeNoteMeta = const VerificationMeta(
+    'outcomeNote',
+  );
+  @override
+  late final GeneratedColumn<String> outcomeNote = GeneratedColumn<String>(
+    'outcome_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -676,6 +687,7 @@ class $ReferralsTable extends Referrals
     receivingFacility,
     reason,
     status,
+    outcomeNote,
     createdAt,
     updatedAt,
   ];
@@ -747,6 +759,15 @@ class $ReferralsTable extends Referrals
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
     }
+    if (data.containsKey('outcome_note')) {
+      context.handle(
+        _outcomeNoteMeta,
+        outcomeNote.isAcceptableOrUnknown(
+          data['outcome_note']!,
+          _outcomeNoteMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -796,6 +817,10 @@ class $ReferralsTable extends Referrals
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      outcomeNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outcome_note'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -821,6 +846,7 @@ class Referral extends DataClass implements Insertable<Referral> {
   final String receivingFacility;
   final String? reason;
   final String status;
+  final String? outcomeNote;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Referral({
@@ -831,6 +857,7 @@ class Referral extends DataClass implements Insertable<Referral> {
     required this.receivingFacility,
     this.reason,
     required this.status,
+    this.outcomeNote,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -846,6 +873,9 @@ class Referral extends DataClass implements Insertable<Referral> {
       map['reason'] = Variable<String>(reason);
     }
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || outcomeNote != null) {
+      map['outcome_note'] = Variable<String>(outcomeNote);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -862,6 +892,9 @@ class Referral extends DataClass implements Insertable<Referral> {
           ? const Value.absent()
           : Value(reason),
       status: Value(status),
+      outcomeNote: outcomeNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outcomeNote),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -880,6 +913,7 @@ class Referral extends DataClass implements Insertable<Referral> {
       receivingFacility: serializer.fromJson<String>(json['receivingFacility']),
       reason: serializer.fromJson<String?>(json['reason']),
       status: serializer.fromJson<String>(json['status']),
+      outcomeNote: serializer.fromJson<String?>(json['outcomeNote']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -895,6 +929,7 @@ class Referral extends DataClass implements Insertable<Referral> {
       'receivingFacility': serializer.toJson<String>(receivingFacility),
       'reason': serializer.toJson<String?>(reason),
       'status': serializer.toJson<String>(status),
+      'outcomeNote': serializer.toJson<String?>(outcomeNote),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -908,6 +943,7 @@ class Referral extends DataClass implements Insertable<Referral> {
     String? receivingFacility,
     Value<String?> reason = const Value.absent(),
     String? status,
+    Value<String?> outcomeNote = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Referral(
@@ -918,6 +954,7 @@ class Referral extends DataClass implements Insertable<Referral> {
     receivingFacility: receivingFacility ?? this.receivingFacility,
     reason: reason.present ? reason.value : this.reason,
     status: status ?? this.status,
+    outcomeNote: outcomeNote.present ? outcomeNote.value : this.outcomeNote,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -936,6 +973,9 @@ class Referral extends DataClass implements Insertable<Referral> {
           : this.receivingFacility,
       reason: data.reason.present ? data.reason.value : this.reason,
       status: data.status.present ? data.status.value : this.status,
+      outcomeNote: data.outcomeNote.present
+          ? data.outcomeNote.value
+          : this.outcomeNote,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -951,6 +991,7 @@ class Referral extends DataClass implements Insertable<Referral> {
           ..write('receivingFacility: $receivingFacility, ')
           ..write('reason: $reason, ')
           ..write('status: $status, ')
+          ..write('outcomeNote: $outcomeNote, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -966,6 +1007,7 @@ class Referral extends DataClass implements Insertable<Referral> {
     receivingFacility,
     reason,
     status,
+    outcomeNote,
     createdAt,
     updatedAt,
   );
@@ -980,6 +1022,7 @@ class Referral extends DataClass implements Insertable<Referral> {
           other.receivingFacility == this.receivingFacility &&
           other.reason == this.reason &&
           other.status == this.status &&
+          other.outcomeNote == this.outcomeNote &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -992,6 +1035,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
   final Value<String> receivingFacility;
   final Value<String?> reason;
   final Value<String> status;
+  final Value<String?> outcomeNote;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const ReferralsCompanion({
@@ -1002,6 +1046,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
     this.receivingFacility = const Value.absent(),
     this.reason = const Value.absent(),
     this.status = const Value.absent(),
+    this.outcomeNote = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -1013,6 +1058,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
     required String receivingFacility,
     this.reason = const Value.absent(),
     this.status = const Value.absent(),
+    this.outcomeNote = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : referralCode = Value(referralCode),
@@ -1027,6 +1073,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
     Expression<String>? receivingFacility,
     Expression<String>? reason,
     Expression<String>? status,
+    Expression<String>? outcomeNote,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -1038,6 +1085,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
       if (receivingFacility != null) 'receiving_facility': receivingFacility,
       if (reason != null) 'reason': reason,
       if (status != null) 'status': status,
+      if (outcomeNote != null) 'outcome_note': outcomeNote,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -1051,6 +1099,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
     Value<String>? receivingFacility,
     Value<String?>? reason,
     Value<String>? status,
+    Value<String?>? outcomeNote,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -1062,6 +1111,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
       receivingFacility: receivingFacility ?? this.receivingFacility,
       reason: reason ?? this.reason,
       status: status ?? this.status,
+      outcomeNote: outcomeNote ?? this.outcomeNote,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -1091,6 +1141,9 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (outcomeNote.present) {
+      map['outcome_note'] = Variable<String>(outcomeNote.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1110,6 +1163,7 @@ class ReferralsCompanion extends UpdateCompanion<Referral> {
           ..write('receivingFacility: $receivingFacility, ')
           ..write('reason: $reason, ')
           ..write('status: $status, ')
+          ..write('outcomeNote: $outcomeNote, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2075,6 +2129,7 @@ typedef $$ReferralsTableCreateCompanionBuilder =
       required String receivingFacility,
       Value<String?> reason,
       Value<String> status,
+      Value<String?> outcomeNote,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -2087,6 +2142,7 @@ typedef $$ReferralsTableUpdateCompanionBuilder =
       Value<String> receivingFacility,
       Value<String?> reason,
       Value<String> status,
+      Value<String?> outcomeNote,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -2151,6 +2207,11 @@ class $$ReferralsTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outcomeNote => $composableBuilder(
+    column: $table.outcomeNote,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2227,6 +2288,11 @@ class $$ReferralsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get outcomeNote => $composableBuilder(
+    column: $table.outcomeNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2294,6 +2360,11 @@ class $$ReferralsTableAnnotationComposer
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
+  GeneratedColumn<String> get outcomeNote => $composableBuilder(
+    column: $table.outcomeNote,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -2359,6 +2430,7 @@ class $$ReferralsTableTableManager
                 Value<String> receivingFacility = const Value.absent(),
                 Value<String?> reason = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> outcomeNote = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ReferralsCompanion(
@@ -2369,6 +2441,7 @@ class $$ReferralsTableTableManager
                 receivingFacility: receivingFacility,
                 reason: reason,
                 status: status,
+                outcomeNote: outcomeNote,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -2381,6 +2454,7 @@ class $$ReferralsTableTableManager
                 required String receivingFacility,
                 Value<String?> reason = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> outcomeNote = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => ReferralsCompanion.insert(
@@ -2391,6 +2465,7 @@ class $$ReferralsTableTableManager
                 receivingFacility: receivingFacility,
                 reason: reason,
                 status: status,
+                outcomeNote: outcomeNote,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
