@@ -5,6 +5,12 @@ from backend.main import app
 from backend.models import Patient, Referral
 from backend.database import get_db, Base, engine
 
+def setup_module():
+    Base.metadata.create_all(bind=engine)
+
+def teardown_module():
+    Base.metadata.drop_all(bind=engine)
+
 client = TestClient(app)
 
 def test_ocr_extract_success():

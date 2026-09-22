@@ -305,3 +305,58 @@ async def extract_ocr(file: UploadFile = File(...)):
     file_bytes = await file.read()
     result = extract_text_from_image(file_bytes)
     return result
+from fastapi import Form, Response
+import re
+from sqlalchemy import func
+
+@app.post("/api/v1/sms/webhook")
+async def sms_webhook(
+    Body: str = Form(default=""),
+    From: str = Form(default=None),
+    db: Session = Depends(get_db)
+):
+    """
+    Simulated SMS provider webhook.
+    Returns TwiML compatible XML.
+    Production implementations require signature verification, rate limiting, and HTTPS.
+    """
+    body_clean = Body.strip() if Body else ""
+    
+    # Check if body is empty
+    if not body_clean:
+        msg = "Please reply with your CareBridge referral code to track status."
+        return Response(content=f"<Response><Message>{msg}</Message></Response>", media_type="application/xml")
+    
+    # Try to find a referral code pattern: CB- followed by 6 alphanumeric chars
+    # We will accept something that looks like CB-ABC123 or cb-abc123
+    match = re.search(r'CB-[a-zA-Z0-9]{6}', body_clean, re.IGNORECASE)
+    
+    if not match:
+        msg = "Please reply with your CareBridge referral code to track status."
+        return Response(content=f"<Response><Message>{msg}</Message></Response>", media_type="application/xml")
+        
+    code = match.group(0).upper()
+    
+    # Defensive lookup
+    try:
+        # Avoid SQL injection by using SQLAlchemy parameters
+        referrals = db.query(Referral).filter(func.upper(Referral.referral_code) == code).all()
+        
+        if not referrals:
+            msg = "Referral not found. It may be pending sync from the clinic."
+            return Response(content=f"<Response><Message>{msg}</Message></Response>", media_type="application/xml")
+            
+        if len(referrals) > 1:
+            # Defensive duplicate handling
+            msg = "An error occurred looking up this referral."
+            return Response(content=f"<Response><Message>{msg}</Message></Response>", media_type="application/xml")
+            
+        ref = referrals[0]
+        # Use .value if it's an enum, else fallback to str
+        status_str = ref.status.value if hasattr(ref.status, 'value') else str(ref.status)
+        msg = f"Referral {ref.referral_code} is currently {status_str}."
+        return Response(content=f"<Response><Message>{msg}</Message></Response>", media_type="application/xml")
+        
+    except Exception as e:
+        msg = "An error occurred looking up this referral."
+        return Response(content=f"<Response><Message>{msg}</Message></Response>", media_type="application/xml")
