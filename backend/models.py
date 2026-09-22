@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum, Text
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum, Text, Float, UniqueConstraint
 from sqlalchemy.orm import relationship
 from backend.database import Base
 
@@ -54,3 +54,31 @@ class ReferralEvent(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     referral = relationship("Referral", back_populates="events")
+
+class IdentityReconciliationStatus(str, enum.Enum):
+    PENDING_REVIEW = "PENDING_REVIEW"
+    CONFIRMED_MATCH = "CONFIRMED_MATCH"
+    REJECTED_MATCH = "REJECTED_MATCH"
+
+class IdentityReconciliation(Base):
+    __tablename__ = "identity_reconciliations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    source_patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False, index=True)
+    candidate_patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(Enum(IdentityReconciliationStatus), default=IdentityReconciliationStatus.PENDING_REVIEW, nullable=False)
+    match_score = Column(Float, nullable=False)
+    components_json = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    source_patient = relationship("Patient", foreign_keys=[source_patient_id])
+    candidate_patient = relationship("Patient", foreign_keys=[candidate_patient_id])
+
+    __table_args__ = (
+        UniqueConstraint(
+            'source_patient_id', 
+            'candidate_patient_id', 
+            name='uq_identity_reconciliation_source_candidate'
+        ),
+    )

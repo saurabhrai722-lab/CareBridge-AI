@@ -49,3 +49,24 @@ class ReferralDetailResponse(ReferralResponse):
 
 class ReferralStatusUpdate(BaseModel):
     status: str
+
+class MatchComponentScores(BaseModel):
+    name: float
+    phone: float
+    age_dob: float
+    village: float
+    guardian: float
+    gender: float
+
+class MatchCandidateResponse(BaseModel):
+    candidate_patient: PatientResponse
+    overall_score: float
+    classification: str
+    component_scores: MatchComponentScores
+    unavailable_fields: list[str]
+    conflicting_fields: list[str]
+    existing_reconciliation_status: Optional[str] = None
+
+class ReconciliationRequest(BaseModel):
+    candidate_patient_id: int
+    action: str # "CONFIRM" or "REJECT"

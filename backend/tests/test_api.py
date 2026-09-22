@@ -115,3 +115,47 @@ def test_update_referral_status():
     # Invalid value
     response3 = client.patch("/api/v1/referrals/CB-STATUS123", json={"status": "NONEXISTENT"})
     assert response3.status_code == 400
+
+def test_reconciliation_workflow():
+    # 1. Create Patient A (Source)
+    client.post("/api/v1/referrals", json={
+        "patient": {"name": "Ramesh Kumar", "phone": "9876543210"},
+        "referral": {"referral_code": "CB-REC1", "referring_facility": "A", "receiving_facility": "B"}
+    })
+    
+    # 2. Create Patient B (Candidate - Typo)
+    client.post("/api/v1/referrals", json={
+        "patient": {"name": "Ramesh Kumer", "phone": "9876543210"},
+        "referral": {"referral_code": "CB-REC2", "referring_facility": "C", "receiving_facility": "D"}
+    })
+    
+    # 3. Create Patient C (Not a match)
+    client.post("/api/v1/referrals", json={
+        "patient": {"name": "John Doe", "phone": "1111111111"},
+        "referral": {"referral_code": "CB-REC3", "referring_facility": "E", "receiving_facility": "F"}
+    })
+
+    # Fetch candidates for CB-REC1
+    res = client.get("/api/v1/referrals/CB-REC1/candidates")
+    assert res.status_code == 200
+    candidates = res.json()
+    
+    # John Doe should not be in the list, only Ramesh Kumer should be there
+    assert len(candidates) == 1
+    assert candidates[0]["candidate_patient"]["name"] == "Ramesh Kumer"
+    assert candidates[0]["classification"] == "LIKELY_MATCH"
+    
+    candidate_id = candidates[0]["candidate_patient"]["id"]
+    
+    # Confirm match
+    rec_res = client.post("/api/v1/referrals/CB-REC1/reconcile", json={
+        "candidate_patient_id": candidate_id,
+        "action": "CONFIRM"
+    })
+    assert rec_res.status_code == 200
+    assert rec_res.json()["status"] == "success"
+    
+    # Fetch candidates again, the list should be empty since we already reconciled
+    res_after = client.get("/api/v1/referrals/CB-REC1/candidates")
+    assert res_after.status_code == 200
+    assert len(res_after.json()) == 0

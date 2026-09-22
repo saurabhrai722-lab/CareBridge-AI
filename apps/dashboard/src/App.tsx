@@ -11,6 +11,7 @@ import {
   FileText,
   X
 } from 'lucide-react';
+import { IdentityReconciliation } from './components/IdentityReconciliation';
 
 const STATUS_COLORS: Record<string, string> = {
   CREATED: 'bg-yellow-500/20 text-yellow-300',
@@ -262,6 +263,14 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
                 </p>
               </div>
             </div>
+          </section>
+
+          {/* Identity Reconciliation (Phase 6) */}
+          <section>
+            <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <User className="w-4 h-4" /> Identity Reconciliation
+            </h3>
+            <IdentityReconciliation referral={referral} />
           </section>
 
           {/* Action Area */}
