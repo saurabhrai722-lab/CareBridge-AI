@@ -34,6 +34,10 @@ class ReferralResponse(ReferralBase):
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
+class ReferralEventCreate(BaseModel):
+    event: str
+    note: Optional[str] = None
+
 class ReferralEventResponse(BaseModel):
     id: int
     referral_id: int

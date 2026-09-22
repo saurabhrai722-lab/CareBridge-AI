@@ -51,6 +51,16 @@ export const updateReferralStatus = async (referral_code: string, status: string
   return response.data;
 };
 
+export const getOverdueReferrals = async (): Promise<Referral[]> => {
+  const response = await api.get('/api/v1/referrals/overdue');
+  return response.data;
+};
+
+export const addReferralEvent = async (referral_code: string, event: string, note?: string): Promise<ReferralEvent> => {
+  const response = await api.post(`/api/v1/referrals/${referral_code}/events`, { event, note });
+  return response.data;
+};
+
 export interface MatchComponentScores {
   name: number;
   phone: number;

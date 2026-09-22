@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List
+from datetime import datetime, timedelta, timezone
 
 from backend.database import get_db, engine, Base
 from backend.models import Patient, Referral, ReferralStatus, ReferralEvent
@@ -11,10 +12,15 @@ from backend.schemas import (
     ReferralSyncPayload, 
     ReferralResponse, 
     ReferralDetailResponse, 
-    ReferralStatusUpdate
+    ReferralStatusUpdate,
+    ReferralEventCreate,
+    ReferralEventResponse
 )
 
 app = FastAPI(title="CareBridge AI Backend")
+
+# Phase 10 Overdue configuration
+OVERDUE_THRESHOLD_HOURS = 48
 
 # Configure CORS
 # Allow origins configured by CORS_ORIGINS env, fallback to dashboard dev server
@@ -97,6 +103,18 @@ def sync_referral(payload: ReferralSyncPayload, db: Session = Depends(get_db)):
             return existing
         raise HTTPException(status_code=400, detail="Database integrity error")
 
+@app.get("/api/v1/referrals/overdue", response_model=List[ReferralResponse])
+def get_overdue_referrals(db: Session = Depends(get_db)):
+    threshold_time = datetime.now(timezone.utc) - timedelta(hours=OVERDUE_THRESHOLD_HOURS)
+    
+    # We want referrals in SENT state created before the threshold time
+    overdue = db.query(Referral).filter(
+        Referral.status == ReferralStatus.SENT,
+        Referral.created_at < threshold_time
+    ).all()
+    
+    return overdue
+
 @app.get("/api/v1/referrals/{referral_code}", response_model=ReferralDetailResponse)
 def get_referral(referral_code: str, db: Session = Depends(get_db)):
     referral = db.query(Referral).filter(Referral.referral_code == referral_code).first()
@@ -114,6 +132,33 @@ VALID_TRANSITIONS = {
     ReferralStatus.DISCHARGED: [ReferralStatus.COMPLETED],
     ReferralStatus.COMPLETED: []
 }
+
+
+
+@app.post("/api/v1/referrals/{referral_code}/events", response_model=ReferralEventResponse)
+def add_referral_event(referral_code: str, event_create: ReferralEventCreate, db: Session = Depends(get_db)):
+    referral = db.query(Referral).filter(Referral.referral_code == referral_code).first()
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+        
+    if not event_create.event.strip():
+        raise HTTPException(status_code=400, detail="Event type cannot be empty")
+        
+    event = ReferralEvent(
+        referral_id=referral.id,
+        event=event_create.event,
+        note=event_create.note
+    )
+    db.add(event)
+    
+    try:
+        db.commit()
+        db.refresh(event)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="Failed to create event")
+        
+    return event
 
 @app.patch("/api/v1/referrals/{referral_code}", response_model=ReferralDetailResponse)
 def update_referral_status(referral_code: str, update: ReferralStatusUpdate, db: Session = Depends(get_db)):

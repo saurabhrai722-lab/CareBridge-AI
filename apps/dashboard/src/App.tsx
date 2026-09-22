@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getReferrals, updateReferralStatus } from './services/api';
+import { getReferrals, updateReferralStatus, addReferralEvent } from './services/api';
 import type { Referral } from './services/api';
 import { 
   Activity, 
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { IdentityReconciliation } from './components/IdentityReconciliation';
 import { ReadmissionRisk } from './components/ReadmissionRisk';
+import { OverdueReferrals } from './components/OverdueReferrals';
 import { OCRVerification } from './components/OCRVerification';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -40,6 +41,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchReferrals = async () => {
     setLoading(true);
@@ -51,6 +53,7 @@ export default function App() {
       setError(err.message || 'Failed to fetch referrals');
     } finally {
       setLoading(false);
+      setRefreshTrigger(prev => prev + 1);
     }
   };
 
@@ -88,6 +91,11 @@ export default function App() {
           <StatCard title="Pending Review" value={pending} icon={<Clock />} color="text-yellow-400" />
           <StatCard title="Currently Admitted" value={admitted} icon={<CheckCircle />} color="text-green-400" />
         </div>
+
+        <OverdueReferrals 
+          onSelectReferral={(r) => setSelectedReferral(r)}
+          refreshTrigger={refreshTrigger}
+        />
 
         <div className="mb-8">
           <OCRVerification onConfirm={(data) => {
@@ -185,6 +193,8 @@ function StatCard({ title, value, icon, color = "text-teal-400" }: any) {
 function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState("");
+  const [submittingNote, setSubmittingNote] = useState(false);
 
   const availableStatuses = VALID_TRANSITIONS[referral.status] || [];
 
@@ -326,6 +336,39 @@ function ReferralModal({ referral, onClose, onStatusUpdated }: any) {
              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
               <Clock className="w-4 h-4" /> Timeline Events
             </h3>
+            
+            <div className="mb-6 bg-slate-800/30 border border-slate-700/50 rounded-xl p-4">
+              <h4 className="text-sm font-medium text-slate-300 mb-2">Log Follow-up Attempt</h4>
+              <div className="flex gap-3">
+                <input 
+                  type="text" 
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="e.g. Called patient, no answer..."
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-teal-500"
+                />
+                <button 
+                  onClick={async () => {
+                    if (!noteText.trim()) return;
+                    setSubmittingNote(true);
+                    try {
+                      await addReferralEvent(referral.referral_code, 'FOLLOW_UP_ATTEMPTED', noteText.trim());
+                      setNoteText('');
+                      onStatusUpdated(); // Refresh modal
+                    } catch (err) {
+                      setError("Failed to add follow-up note.");
+                    } finally {
+                      setSubmittingNote(false);
+                    }
+                  }}
+                  disabled={submittingNote || !noteText.trim()}
+                  className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {submittingNote ? 'Saving...' : 'Add Note'}
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-3">
               {referral.events.map((e: any) => (
                 <div key={e.id} className="text-sm border-l-2 border-slate-700 pl-4 py-1">
