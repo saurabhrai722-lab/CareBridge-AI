@@ -92,3 +92,26 @@ class ReadmissionRiskResponse(BaseModel):
     risk_category: Optional[str] = None
     base_value: Optional[float] = None
     shap_values: Optional[List[ShapExplanation]] = None
+
+# Phase 8 Schemas
+class OCRFieldResponse(BaseModel):
+    value: Optional[str] = None
+    confidence: Optional[float] = None
+
+class OCRFields(BaseModel):
+    patient_name: OCRFieldResponse
+    phone: OCRFieldResponse
+    date_of_birth: OCRFieldResponse
+    gender: OCRFieldResponse
+    village: OCRFieldResponse
+    guardian_name: OCRFieldResponse
+    referring_facility: OCRFieldResponse
+    receiving_facility: OCRFieldResponse
+    referral_reason: OCRFieldResponse
+
+class OCRResponse(BaseModel):
+    status: str
+    is_simulated: bool
+    fields: OCRFields
+    detail: Optional[str] = None
+

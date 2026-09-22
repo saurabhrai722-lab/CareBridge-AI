@@ -9,3 +9,7 @@ scikit-learn
 pandas
 shap
 joblib
+python-multipart
+Pillow
+pytesseract
+httpx

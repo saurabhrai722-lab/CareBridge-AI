@@ -290,3 +290,18 @@ def get_readmission_risk(req: ReadmissionRiskRequest):
     
     result = predict_readmission_risk(features_dict)
     return result
+
+from fastapi import UploadFile, File
+from backend.schemas import OCRResponse
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from ocr.parser import extract_text_from_image
+
+@app.post("/api/v1/ocr/extract", response_model=OCRResponse)
+async def extract_ocr(file: UploadFile = File(...)):
+    # Simply pass the file bytes to the OCR parser.
+    # We do NOT create any DB records here (Phase 8 correction).
+    file_bytes = await file.read()
+    result = extract_text_from_image(file_bytes)
+    return result

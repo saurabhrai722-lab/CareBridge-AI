@@ -110,3 +110,14 @@ export const getReadmissionRisk = async (payload: ReadmissionRiskRequest): Promi
   const response = await api.post('/api/v1/predictions/readmission-risk', payload);
   return response.data;
 };
+
+export async function extractOCR(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/api/v1/ocr/extract', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};

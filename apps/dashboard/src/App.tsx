@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { IdentityReconciliation } from './components/IdentityReconciliation';
 import { ReadmissionRisk } from './components/ReadmissionRisk';
+import { OCRVerification } from './components/OCRVerification';
 
 const STATUS_COLORS: Record<string, string> = {
   CREATED: 'bg-yellow-500/20 text-yellow-300',
@@ -86,6 +87,12 @@ export default function App() {
           <StatCard title="Total Referrals" value={total} icon={<FileText />} />
           <StatCard title="Pending Review" value={pending} icon={<Clock />} color="text-yellow-400" />
           <StatCard title="Currently Admitted" value={admitted} icon={<CheckCircle />} color="text-green-400" />
+        </div>
+
+        <div className="mb-8">
+          <OCRVerification onConfirm={(data) => {
+            alert(`Verified Data Ready for submission:\n${JSON.stringify(data, null, 2)}\n\n(This would normally proceed to the referral creation workflow)`);
+          }} />
         </div>
 
         {error && (
