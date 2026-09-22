@@ -8,9 +8,10 @@ class SyncService {
   final AppDatabase _db;
   final ApiClient _apiClient;
   final Connectivity _connectivity;
+  final Duration staleRecoveryTimeout;
   bool _isSyncing = false;
 
-  SyncService(this._db, this._apiClient, {Connectivity? connectivity})
+  SyncService(this._db, this._apiClient, {Connectivity? connectivity, this.staleRecoveryTimeout = const Duration(minutes: 10)})
       : _connectivity = connectivity ?? Connectivity() {
     _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {
       if (results.isNotEmpty && results.first != ConnectivityResult.none) {
@@ -19,26 +20,26 @@ class SyncService {
     });
   }
 
-  Future<void> syncAll() async {
+  Future<void> syncAll({bool force = false}) async {
     if (_isSyncing) return;
     _isSyncing = true;
 
     try {
       final now = DateTime.now();
-      // Recover IN_PROGRESS items older than 10 minutes
-      final timeoutThreshold = now.subtract(const Duration(minutes: 10));
+      // Recover IN_PROGRESS items older than the threshold
+      final timeoutThreshold = now.subtract(staleRecoveryTimeout);
 
       final items = await (_db.select(_db.syncQueue)
             ..where((t) =>
                 t.status.equals('PENDING') |
                 t.status.equals('FAILED_RETRY') |
-                (t.status.equals('IN_PROGRESS') & t.updatedAt.isSmallerThanValue(timeoutThreshold)))
+                (force ? t.status.equals('IN_PROGRESS') : (t.status.equals('IN_PROGRESS') & t.updatedAt.isSmallerThanValue(timeoutThreshold))))
             ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
           .get();
 
       for (final item in items) {
         // Backoff for FAILED_RETRY: wait (retryCount * 2) minutes before retrying
-        if (item.status == 'FAILED_RETRY' && item.retryCount > 0) {
+        if (!force && item.status == 'FAILED_RETRY' && item.retryCount > 0) {
           final waitDuration = Duration(minutes: item.retryCount * 2);
           if (item.updatedAt.add(waitDuration).isAfter(now)) {
             continue; // Skip, not enough time has passed

@@ -19,9 +19,9 @@ class ReferralListScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.sync),
             onPressed: () {
-              syncService.syncAll();
+              syncService.syncAll(force: true);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Syncing...')),
+                const SnackBar(content: Text('Force Syncing...')),
               );
             },
           ),
