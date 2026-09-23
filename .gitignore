@@ -15,3 +15,5 @@ venv/
 build/
 *.DS_Store
 *.db
+
+.idea/

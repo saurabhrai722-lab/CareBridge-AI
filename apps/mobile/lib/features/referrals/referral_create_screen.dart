@@ -57,13 +57,21 @@ class _ReferralCreateScreenState extends State<ReferralCreateScreen> {
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Referral Created: ${saved.referral.referralCode}')),
+          SnackBar(
+            content: Text('Referral Created: ${saved.referral.referralCode}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: const Color(0xFF047857),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         Navigator.pop(context);
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving referral: $e')),
+          SnackBar(
+            content: Text('Error saving referral: $e'),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       } finally {
         if (mounted) {
@@ -73,66 +81,166 @@ class _ReferralCreateScreenState extends State<ReferralCreateScreen> {
     }
   }
 
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16, top: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFF1E56A0)),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E56A0),
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    bool required = false,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        style: const TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF0B1528)),
+        decoration: InputDecoration(
+          labelText: labelText + (required ? ' *' : ''),
+          labelStyle: TextStyle(
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF1E56A0), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+        validator: required
+            ? (value) => value == null || value.trim().isEmpty ? 'This field is required' : null
+            : null,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New Referral')),
+      backgroundColor: const Color(0xFFFAFAFC),
+      appBar: AppBar(
+        title: const Text('New Referral', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5)),
+      ),
       body: _isSaving 
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF1E56A0)))
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(24.0),
                 children: [
-                  const Text('Patient Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  TextFormField(
+                  _buildSectionTitle('PATIENT INFORMATION', Icons.person_add_alt_1),
+                  _buildTextField(
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Patient Name *'),
-                    validator: (value) => value == null || value.trim().isEmpty ? 'Patient Name is required' : null,
+                    labelText: 'Patient Name',
+                    required: true,
                   ),
-                  TextFormField(
+                  _buildTextField(
                     controller: _phoneController,
-                    decoration: const InputDecoration(labelText: 'Phone Number'),
+                    labelText: 'Phone Number',
                     keyboardType: TextInputType.phone,
                   ),
-                  TextFormField(
-                    controller: _dobController,
-                    decoration: const InputDecoration(labelText: 'DOB or Age'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _dobController,
+                          labelText: 'DOB or Age',
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildTextField(
+                          controller: _genderController,
+                          labelText: 'Gender',
+                        ),
+                      ),
+                    ],
                   ),
-                  TextFormField(
-                    controller: _genderController,
-                    decoration: const InputDecoration(labelText: 'Gender'),
-                  ),
-                  TextFormField(
+                  _buildTextField(
                     controller: _villageController,
-                    decoration: const InputDecoration(labelText: 'Village/Location'),
+                    labelText: 'Village/Location',
                   ),
-                  TextFormField(
+                  _buildTextField(
                     controller: _guardianController,
-                    decoration: const InputDecoration(labelText: 'Guardian Name'),
+                    labelText: 'Guardian Name',
                   ),
-                  const SizedBox(height: 24),
-                  const Text('Referral Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  TextFormField(
+                  
+                  const SizedBox(height: 16),
+                  const Divider(color: Color(0xFFE2E8F0)),
+                  const SizedBox(height: 16),
+                  
+                  _buildSectionTitle('REFERRAL DETAILS', Icons.medical_services_rounded),
+                  _buildTextField(
                     controller: _referringFacilityController,
-                    decoration: const InputDecoration(labelText: 'Referring Facility *'),
-                    validator: (value) => value == null || value.trim().isEmpty ? 'Referring Facility is required' : null,
+                    labelText: 'Referring Facility',
+                    required: true,
                   ),
-                  TextFormField(
+                  _buildTextField(
                     controller: _receivingFacilityController,
-                    decoration: const InputDecoration(labelText: 'Receiving Facility *'),
-                    validator: (value) => value == null || value.trim().isEmpty ? 'Receiving Facility is required' : null,
+                    labelText: 'Receiving Facility',
+                    required: true,
                   ),
-                  TextFormField(
+                  _buildTextField(
                     controller: _reasonController,
-                    decoration: const InputDecoration(labelText: 'Reason for Referral'),
+                    labelText: 'Reason for Referral',
                     maxLines: 3,
                   ),
+                  
                   const SizedBox(height: 24),
+                  
                   ElevatedButton(
                     onPressed: _save,
-                    child: const Text('Save Offline'),
-                  )
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E56A0),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Save & Sync Offline',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

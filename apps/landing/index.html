@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CareBridge AI — One Platform. Every Step of Care.</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,400;1,600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Newsreader"', 'serif'],
+          },
+          colors: {
+            brand: {
+              navy: '#0B1528',
+              slate: '#1E293B',
+              muted: '#64748B',
+              blue: '#1E56A0',
+              blueLight: '#2563EB',
+              blueSoft: '#EFF6FF',
+              green: '#047857',
+              greenSoft: '#ECFDF5',
+              purple: '#7C3AED',
+              purpleSoft: '#F5F3FF',
+              bgLight: '#FAFAFC',
+              cardBg: '#FFFFFF',
+              border: '#E2E8F0',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFAFC;
+      color: #0B1528;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.3; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .animate-pulse-dot {
+      animation: pulseDot 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: inline-flex;
+      white-space: nowrap;
+      animation: marquee 32s linear infinite;
+    }
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="selection:bg-brand-blue selection:text-white">
+
+  <!-- ================= PRELOADER / INTRO SCREEN ================= -->
+  <div id="preloader" class="fixed inset-0 z-[999] bg-[#0B1528] text-white flex flex-col items-center justify-center transition-opacity duration-700 ease-out">
+    <div class="relative w-72 h-44 flex items-center justify-center mb-8">
+      <!-- Dotted Node Visual -->
+      <svg class="w-full h-full text-blue-400/30" viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <pattern id="dotGrid" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.2" fill="currentColor" opacity="0.45"/>
+        </pattern>
+        <rect width="280" height="140" fill="url(#dotGrid)"/>
+        
+        <!-- Animated Connecting Arcs -->
+        <path d="M 30 100 Q 140 20 250 90" stroke="#38BDF8" stroke-width="2" stroke-dasharray="6 4" class="animate-pulse"/>
+        <path d="M 60 40 Q 140 120 220 50" stroke="#818CF8" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.7"/>
+
+        <!-- Nodes -->
+        <circle cx="30" cy="100" r="4.5" fill="#38BDF8"/>
+        <circle cx="140" cy="55" r="5" fill="#34D399"/>
+        <circle cx="250" cy="90" r="4.5" fill="#60A5FA"/>
+        <circle cx="60" cy="40" r="3.5" fill="#A78BFA"/>
+        <circle cx="220" cy="50" r="3.5" fill="#38BDF8"/>
+      </svg>
+    </div>
+    
+    <div class="flex items-baseline space-x-3">
+      <span class="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Synchronizing Care Grid</span>
+      <span id="loaderCount" class="font-mono text-3xl font-light text-blue-400">00</span>
+      <span class="text-sm font-mono text-slate-400">%</span>
+    </div>
+    <p class="text-xs text-slate-400/80 mt-3 font-mono">Hospital → Transit → Primary Health Center</p>
+  </div>
+
+  <!-- ================= TOP UTILITY BAR (OPERATING REGIONS & TICKER) ================= -->
+  <aside aria-label="Operational Telemetry Strip" class="w-full bg-[#0B1528] text-slate-300 text-xs py-2 px-6 border-b border-slate-800/80 flex items-center justify-between overflow-hidden">
+    <div class="hidden lg:flex items-center space-x-4 shrink-0 text-slate-400">
+      <span class="flex items-center gap-1.5 text-emerald-400 font-medium tracking-wide">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        ACTIVE COVERAGE REGIONS
+      </span>
+      <span class="text-slate-600">/</span>
+      <span class="text-slate-300 font-medium">Maharashtra · Karnataka · Delhi NCR · Tamil Nadu · Telangana</span>
+    </div>
+
+    <!-- Live Healthcare Ticker -->
+    <div class="flex-1 max-w-2xl overflow-hidden relative mx-4">
+      <div class="animate-marquee items-center gap-10 text-slate-300">
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> <strong>524 referrals tracked today</strong> across 14 district nodes</span>
+        <span class="flex items-center gap-2 text-slate-400">·</span>
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> <strong>98.7% FHIR Handshake Integrity</strong> in Q1 2026</span>
+        <span class="flex items-center gap-2 text-slate-400">·</span>
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span> <strong>CareBridge AI v1.0.0 CodeX Live Ready</strong></span>
+        <span class="flex items-center gap-2 text-slate-400">·</span>
+        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> <strong>Average PHC loop closure:</strong> 42 minutes faster than regional baseline</span>
+      </div>
+    </div>
+
+    <div class="hidden sm:flex items-center gap-4 shrink-0">
+      <span class="font-mono text-[11px] text-slate-400">NODE LATENCY: 14ms</span>
+      <a href="#demo" class="hover:text-white transition-colors underline decoration-slate-600 underline-offset-4 font-medium">Hospital Login →</a>
+    </div>
+  </aside>
+
+  <!-- ================= MINIMAL EDITORIAL HEADER / NAV ================= -->
+  <header class="sticky top-0 z-50 bg-[#FAFAFC]/90 backdrop-blur-md border-b border-slate-200/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <!-- Brand Wordmark -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-8 h-8 rounded-lg bg-brand-navy flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:bg-brand-blue transition-colors">
+          <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xl font-bold tracking-tight text-brand-navy leading-none">CareBridge<span class="text-brand-blue">AI</span></span>
+          <span class="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Continuity Infrastructure</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-700">
+        <a href="#platform" class="hover:text-brand-blue transition-colors">Platform</a>
+        <a href="#how-it-works" class="hover:text-brand-blue transition-colors">How It Works</a>
+        <a href="#hospitals" class="hover:text-brand-blue transition-colors">For Hospitals</a>
+        <a href="#phcs" class="hover:text-brand-blue transition-colors">For PHCs</a>
+        <a href="#insights" class="hover:text-brand-blue transition-colors">Insights</a>
+        <a href="#network" class="hover:text-brand-blue transition-colors">Network</a>
+      </nav>
+
+      <!-- Action CTA -->
+      <div class="flex items-center gap-4">
+        <a href="#demo" class="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold bg-brand-navy text-white hover:bg-brand-blue transition-all duration-200 shadow-sm hover:shadow">
+          Request a Demo
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION (EDITORIAL & CINEMATIC) ================= -->
+  <section class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden border-b border-slate-200">
+    <!-- Subtle dotted architectural grid background -->
+    <div class="absolute inset-0 opacity-[0.035] pointer-events-none bg-[radial-gradient(#0B1528_1px,transparent_1px)] [background-size:24px_24px]"></div>
+
+    <div class="max-w-7xl mx-auto px-6 relative z-10">
+      <div class="max-w-4xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest bg-brand-blueSoft text-brand-blue mb-8 border border-blue-100">
+          <span class="w-2 h-2 rounded-full bg-brand-blue animate-pulse"></span>
+          Clinical-Grade Enterprise Referral Continuity
+        </div>
+        
+        <h1 class="text-5xl sm:text-7xl lg:text-[5.25rem] font-extrabold tracking-tight text-brand-navy leading-[1.05] mb-8 font-sans">
+          One Platform.<br/>
+          <span class="font-editorial italic font-normal text-slate-700">Every Step</span> of Care.
+        </h1>
+
+        <p class="text-xl sm:text-2xl text-slate-600 font-normal leading-relaxed mb-10 max-w-3xl">
+          CareBridge AI unifies tertiary hospital discharge, cross-facility patient transfer, and primary clinic follow-up into one accountable, auditable closed loop.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <a href="#demo" class="inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-semibold bg-brand-blue text-white hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
+            Talk with us
+            <svg class="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#how-it-works" class="inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-semibold border border-slate-300 text-brand-navy bg-white hover:bg-slate-50 transition-all duration-200">
+            See the Platform
+          </a>
+          <div class="flex items-center gap-3 sm:ml-4 py-2 text-xs text-slate-500 font-medium">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+            Verified with FHIR R4 &amp; ABDM Compliant
+          </div>
+        </div>
+      </div>
+
+      <!-- Cinematic Full-Bleed Image Frame -->
+      <div class="mt-16 lg:mt-20 relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/80 bg-slate-900 group">
+        <img 
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpOtv9VAfwVk3BSeEePem2E20auW8-3Pyssc8htfWaUxARfHLM-g73zE5f9qSAyAvr5E6Ba8CXzYIyh3tZ99gPxZ1snkW9ORvDkk4DB87RxQuJ-gSR1O6sTKPbVr4gbi8YxTR835v5Iptykor-6BpDVZ8xA3wS4R-nvdnn2QZNlcyXK-oy6w58kHnNYNka_c3z6-j7HTSI6wPESOcNI4h9QVvlDgCAr0Zo78gk4TKZRYXBc3QXCHdYRA" 
+          alt="Modern bright hospital corridor with clinical staff collaborating" 
+          class="w-full h-[380px] sm:h-[500px] lg:h-[620px] object-cover object-center transform group-hover:scale-[1.01] transition-transform duration-700 ease-out"
+        />
+        
+        <!-- Gradient vignette for text clarity and editorial depth -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20 pointer-events-none"></div>
+
+        <!-- Floating Live Telemetry Badge over Cinematic Photo -->
+        <div class="absolute bottom-6 left-6 right-6 sm:left-10 sm:bottom-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
+          <div class="backdrop-blur-md bg-slate-950/60 p-5 sm:p-6 rounded-xl border border-white/15 max-w-md">
+            <div class="flex items-center justify-between text-xs text-sky-300 mb-2 font-mono">
+              <span>METRO GENERAL → AL-AMAL PHC</span>
+              <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-400/30">HANDSHAKE VERIFIED</span>
+            </div>
+            <p class="text-sm font-medium text-slate-100 leading-snug">
+              "Continuous clinical handover eliminates drop-off between discharge and community follow-up."
+            </p>
+          </div>
+
+          <div class="hidden md:flex flex-col items-end text-right text-xs font-mono text-slate-300">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>PATIENT RECONCILIATION SPEED: 1.2s</span>
+            </div>
+            <span class="text-slate-400 mt-1">HUMAN-IN-THE-LOOP VERIFIED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= STATS STRIP (ANIMATED NUMBER REVEAL) ================= -->
+  <section class="border-b border-slate-200 bg-white py-14">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+        
+        <!-- Stat 1 -->
+        <div class="pt-6 sm:pt-0 sm:px-6 first:pl-0">
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl sm:text-5xl font-extrabold text-brand-navy tracking-tight stat-number" data-target="2500">2,500</span>
+            <span class="text-3xl font-extrabold text-brand-blue">+</span>
+          </div>
+          <p class="text-sm font-semibold uppercase tracking-wider text-slate-500 mt-2">Referrals Tracked Monthly</p>
+          <p class="text-xs text-slate-400 mt-1">Across 14 rural &amp; district healthcare clusters</p>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="pt-6 sm:pt-0 sm:px-6">
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl sm:text-5xl font-extrabold text-brand-green tracking-tight stat-number" data-target="98.2">98.2</span>
+            <span class="text-3xl font-extrabold text-brand-green">%</span>
+          </div>
+          <p class="text-sm font-semibold uppercase tracking-wider text-slate-500 mt-2">Successfully Closed with PHC</p>
+          <p class="text-xs text-slate-400 mt-1">Confirmed bi-directional clinic visit validation</p>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="pt-6 sm:pt-0 sm:px-6">
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl sm:text-5xl font-extrabold text-brand-navy tracking-tight stat-number" data-target="140">140</span>
+            <span class="text-3xl font-extrabold text-brand-blue">+</span>
+          </div>
+          <p class="text-sm font-semibold uppercase tracking-wider text-slate-500 mt-2">Facilities Connected</p>
+          <p class="text-xs text-slate-400 mt-1">Tertiary teaching centers, district &amp; PHC outposts</p>
+        </div>
+
+        <!-- Stat 4 -->
+        <div class="pt-6 sm:pt-0 sm:px-6">
+          <div class="flex items-baseline gap-1">
+            <span class="text-4xl sm:text-5xl font-extrabold text-brand-navy tracking-tight stat-number" data-target="4.2">4.2</span>
+            <span class="text-2xl font-bold text-slate-500 ml-1">Days</span>
+          </div>
+          <p class="text-sm font-semibold uppercase tracking-wider text-slate-500 mt-2">Average Time-to-Follow-Up</p>
+          <p class="text-xs text-slate-400 mt-1">Down from 18.6 days regional baseline</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= "WE DON'T JUST REFER. WE OWN THE OUTCOME" ================= -->
+  <section class="py-24 lg:py-32 bg-[#FAFAFC] border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        
+        <div class="lg:col-span-7">
+          <div class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-4">Accountability Architecture</div>
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-brand-navy tracking-tight leading-[1.1] mb-8 font-sans">
+            We Don't Just Refer.<br/>
+            <span class="font-editorial italic font-normal text-slate-700">We Follow Through.</span>
+          </h2>
+
+          <p class="text-lg sm:text-xl text-slate-600 leading-relaxed mb-6">
+            In standard healthcare, the hospital discharge is the point of greatest vulnerability. Paper discharge summaries disappear into pockets; patients fail to arrive at rural health clinics; and re-admissions occur without warning.
+          </p>
+
+          <p class="text-base text-slate-600 leading-relaxed mb-8">
+            CareBridge AI bridges the structural gulf between tertiary medical hubs and primary health centers (PHCs). By turning every transfer into an active, cryptographic handshake with offline-first synchrony, both institutions share a single source of clinical truth.
+          </p>
+
+          <div class="space-y-4 border-t border-slate-200 pt-8">
+            <div class="flex items-start gap-4">
+              <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <strong class="text-brand-navy font-semibold text-sm">Full Cycle Traceability:</strong>
+                <span class="text-slate-600 text-sm ml-1">Hospital → Dispatch → Transport → Triage → Community PHC Loop Closure.</span>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4">
+              <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <strong class="text-brand-navy font-semibold text-sm">Zero Patient Misidentification:</strong>
+                <span class="text-slate-600 text-sm ml-1">AI-assisted identity linkage paired with mandatory clinical human verification.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editorial Graphic Card -->
+        <div class="lg:col-span-5">
+          <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
+              <span class="text-xs uppercase font-mono text-slate-400">PATIENT CONTINUITY PROTOCOL</span>
+              <span class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold rounded-full">ACTIVE VERIFIED</span>
+            </div>
+
+            <!-- Visual Transfer Route Simulation -->
+            <div class="space-y-6 relative">
+              <!-- Left connector line -->
+              <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-200"></div>
+
+              <!-- Point 1 -->
+              <div class="relative flex items-start gap-4 pl-1">
+                <div class="w-6 h-6 rounded-full bg-brand-navy text-white text-[10px] font-bold flex items-center justify-center ring-4 ring-white z-10">1</div>
+                <div>
+                  <h4 class="text-sm font-bold text-brand-navy">Tertiary Hospital Discharge</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">FHIR R4 MedicationStatement &amp; OCR record packaged.</p>
+                </div>
+              </div>
+
+              <!-- Point 2 -->
+              <div class="relative flex items-start gap-4 pl-1">
+                <div class="w-6 h-6 rounded-full bg-purple-600 text-white text-[10px] font-bold flex items-center justify-center ring-4 ring-white z-10">2</div>
+                <div>
+                  <h4 class="text-sm font-bold text-brand-navy">AI Readmission Scoring &amp; SHAP</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">30-day risk calibrated; actionable care plan prioritized.</p>
+                </div>
+              </div>
+
+              <!-- Point 3 -->
+              <div class="relative flex items-start gap-4 pl-1">
+                <div class="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center ring-4 ring-white z-10">3</div>
+                <div>
+                  <h4 class="text-sm font-bold text-brand-navy">Offline-Ready Mesh Dispatch</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Transmitted to local PHC Android client with cryptographic sync.</p>
+                </div>
+              </div>
+
+              <!-- Point 4 -->
+              <div class="relative flex items-start gap-4 pl-1">
+                <div class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center ring-4 ring-white z-10">4</div>
+                <div>
+                  <h4 class="text-sm font-bold text-brand-navy">PHC Counter-Referral Handshake</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Field nurse verifies patient vitals; loop marked CLOSED.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
+              <span>FHIR R4 QUEUE: 0 LAG</span>
+              <span class="text-emerald-600 font-semibold">100% AUDITABLE</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CAPABILITIES GRID (CLEAN, CARD-FREE EDITORIAL GRID) ================= -->
+  <section id="platform" class="py-24 lg:py-32 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="max-w-3xl mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-3 block">Care Continuity Capabilities</span>
+        <h2 class="text-4xl sm:text-5xl font-extrabold text-brand-navy tracking-tight font-sans">
+          Engineered for clinical certainty at scale.
+        </h2>
+        <p class="text-lg text-slate-600 mt-4">
+          Six foundational technologies built into a single accountable pipeline.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+        
+        <!-- 1. Referral Creation & Tracking -->
+        <div class="flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-slate-100 text-brand-navy flex items-center justify-center mb-6">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              <path d="m9 14 2 2 4-4"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-brand-navy mb-2">Referral Creation &amp; Tracking</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Unique tracking codes assign unambiguous custody to every referral across 7 discrete stages from hospital intake to community care.
+          </p>
+        </div>
+
+        <!-- 2. Identity Reconciliation -->
+        <div class="flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-slate-100 text-brand-blue flex items-center justify-center mb-6">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M10 15H6a4 4 0 0 0-4 4v2"></path>
+              <path d="m14 19 3 3 5-5"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-brand-navy mb-2">Identity Reconciliation</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            AI fuzzy linkage compares incoming demographic data against master hospital MPIs, requiring clinician sign-off before patient records are merged.
+          </p>
+        </div>
+
+        <!-- 3. AI Readmission Risk -->
+        <div class="flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-brand-navy mb-2">AI Readmission Risk</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            XGBoost predictive modeling delivers a 30-day acuity risk score accompanied by SHAP explainability graphs to highlight preventative factors.
+          </p>
+        </div>
+
+        <!-- 4. OCR Discharge Capture -->
+        <div class="flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-slate-100 text-brand-navy flex items-center justify-center mb-6">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"></path>
+              <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-brand-navy mb-2">OCR Discharge Capture</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Converts legacy paper referral slips and handwritten discharge notes into FHIR MedicationStatements with explicit confidence scoring and human verification.
+          </p>
+        </div>
+
+        <!-- 5. Offline-First Mobile Sync -->
+        <div class="flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-brand-green flex items-center justify-center mb-6">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+              <path d="M12 18h.01"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-brand-navy mb-2">Offline-First Mobile Sync</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Field nurses operate in remote primary clinics with zero internet drop-out; local SQLite caches synchronize securely the moment connectivity returns.
+          </p>
+        </div>
+
+        <!-- 6. PHC Outcome Closure -->
+        <div class="flex flex-col">
+          <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center mb-6">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-brand-navy mb-2">PHC Outcome Closure</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Completes the circle. The tertiary specialist receives automated notification and counter-referral notes when the patient completes their community health check.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RELIABILITY AT EVERY MILESTONE ================= -->
+  <section class="py-20 bg-brand-navy text-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-slate-800">
+        
+        <!-- Pillar 1 -->
+        <div class="pt-8 md:pt-0 md:px-8 first:pl-0">
+          <div class="w-10 h-10 rounded-lg bg-blue-900/50 text-blue-400 flex items-center justify-center mb-6 border border-blue-800/60">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-3 tracking-tight">Real-Time Referral Status</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Zero ambiguity. Seven synchronized states (`CREATED` to `COMPLETED`) shared instantaneously between both clinical parties.
+          </p>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="pt-8 md:pt-0 md:px-8">
+          <div class="w-10 h-10 rounded-lg bg-emerald-900/50 text-emerald-400 flex items-center justify-center mb-6 border border-emerald-800/60">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-3 tracking-tight">Statewide Facility Network</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Pre-integrated district hospital directories and local PHC clinics mapped to regional health authority boundaries.
+          </p>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="pt-8 md:pt-0 md:px-8">
+          <div class="w-10 h-10 rounded-lg bg-purple-900/50 text-purple-400 flex items-center justify-center mb-6 border border-purple-800/60">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-3 tracking-tight">Human-Verified, Always</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Machine intelligence assists and alerts; licensed doctors and nurses retain final sign-off on every patient record merge.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= "WHY US" 5-ITEM BENEFIT LIST ================= -->
+  <section id="how-it-works" class="py-24 lg:py-32 bg-[#FAFAFC] border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        <div class="lg:col-span-5 sticky top-28">
+          <span class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-3 block">Architectural Advantages</span>
+          <h2 class="text-4xl sm:text-5xl font-extrabold text-brand-navy tracking-tight leading-[1.15] mb-6 font-sans">
+            Built for the realities of modern public health.
+          </h2>
+          <p class="text-base text-slate-600 leading-relaxed mb-8">
+            Unlike fragmented generic EHR add-ons, CareBridge AI was designed around the structural friction between multi-specialty urban institutions and rural primary outposts.
+          </p>
+          <a href="#demo" class="inline-flex items-center text-sm font-bold text-brand-blue hover:text-brand-navy transition-colors">
+            Review the clinical specification →
+          </a>
+        </div>
+
+        <div class="lg:col-span-7 space-y-6">
+          
+          <!-- Benefit 1 -->
+          <div class="bg-white p-7 rounded-xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+            <div class="w-8 h-8 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 mt-1 font-bold text-xs">
+              01
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-brand-navy mb-1.5">One Continuous Record</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                A single unified timeline follows the patient across the continuum. No disjointed discharge summaries, lost attachments, or forgotten lab follow-ups.
+              </p>
+            </div>
+          </div>
+
+          <!-- Benefit 2 -->
+          <div class="bg-white p-7 rounded-xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+            <div class="w-8 h-8 rounded-full bg-blue-50 text-brand-blue flex items-center justify-center shrink-0 mt-1 font-bold text-xs">
+              02
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-brand-navy mb-1.5">Full Visibility, Hospital to PHC</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                Both referring clinics and receiving tertiary wards share real-time custody awareness. Clinicians see arrival windows, bed allocations, and direct triage updates.
+              </p>
+            </div>
+          </div>
+
+          <!-- Benefit 3 -->
+          <div class="bg-white p-7 rounded-xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+            <div class="w-8 h-8 rounded-full bg-emerald-50 text-brand-green flex items-center justify-center shrink-0 mt-1 font-bold text-xs">
+              03
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-brand-navy mb-1.5">Human Oversight on Every Match</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                Zero automated silent merging. When patient demographics conflict, the platform presents a side-by-side verification view with audit token tracking.
+              </p>
+            </div>
+          </div>
+
+          <!-- Benefit 4 -->
+          <div class="bg-white p-7 rounded-xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+            <div class="w-8 h-8 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center shrink-0 mt-1 font-bold text-xs">
+              04
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-brand-navy mb-1.5">Transparent AI, No Black Box</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                Our readmission risk predictions are fully explainable via local SHAP factor contributions. Doctors see exactly which clinical covariates elevated or lowered probability.
+              </p>
+            </div>
+          </div>
+
+          <!-- Benefit 5 -->
+          <div class="bg-white p-7 rounded-xl border border-slate-200/80 shadow-sm flex items-start gap-5">
+            <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 mt-1 font-bold text-xs">
+              05
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-brand-navy mb-1.5">Fast Escalation When Something's Off</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                Built-in clinical escalation pathways flag missed community visits within 48 hours, enabling early home health interventions before emergency re-admission occurs.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TESTIMONIAL / EDITORIAL QUOTE CAROUSEL ================= -->
+  <section class="py-24 bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <div class="w-12 h-12 mx-auto rounded-full bg-blue-50 text-brand-blue flex items-center justify-center mb-8">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+      </div>
+
+      <blockquote class="text-2xl sm:text-3xl lg:text-4xl font-editorial italic text-brand-navy leading-snug mb-10 max-w-4xl mx-auto">
+        "Before CareBridge, nearly 40% of our high-acuity heart failure patients never made it to their rural clinic follow-up. Now, every single discharge is an active digital handshake with our community partners."
+      </blockquote>
+
+      <div class="flex flex-col items-center justify-center">
+        <div class="font-bold text-brand-navy text-base">Dr. Sarah Al-Mansoor, MD</div>
+        <div class="text-xs text-slate-500 uppercase tracking-widest font-semibold mt-1">Chief Medical Officer · Metro General Tertiary Hospital</div>
+        <div class="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Clinical Partner
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PARTNER / CONNECTED NETWORK STRIP ================= -->
+  <section id="network" class="py-16 bg-[#FAFAFC] border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <p class="text-center text-xs uppercase tracking-widest font-bold text-slate-400 mb-10">
+        Connected to Leading Tertiary Health Systems &amp; Public Health Grids
+      </p>
+
+      <!-- Minimal Gray-to-Color Partner Network Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center opacity-75 hover:opacity-100 transition-opacity">
+        <div class="flex items-center space-x-2 font-bold text-slate-700 hover:text-brand-blue transition-colors">
+          <span class="w-2.5 h-2.5 rounded-sm bg-brand-blue"></span>
+          <span class="text-sm tracking-tight">METRO TERTIARY</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 hover:text-brand-blue transition-colors">
+          <span class="w-2.5 h-2.5 rounded-sm bg-emerald-600"></span>
+          <span class="text-sm tracking-tight">ST. JUDE HEALTH</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 hover:text-brand-blue transition-colors">
+          <span class="w-2.5 h-2.5 rounded-sm bg-sky-600"></span>
+          <span class="text-sm tracking-tight">KANO NORTH PHC</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 hover:text-brand-blue transition-colors">
+          <span class="w-2.5 h-2.5 rounded-sm bg-indigo-600"></span>
+          <span class="text-sm tracking-tight">GREENWOOD CLINIC</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 hover:text-brand-blue transition-colors">
+          <span class="w-2.5 h-2.5 rounded-sm bg-teal-600"></span>
+          <span class="text-sm tracking-tight">OAKHAVEN DISTRICT</span>
+        </div>
+        <div class="flex items-center space-x-2 font-bold text-slate-700 hover:text-brand-blue transition-colors">
+          <span class="w-2.5 h-2.5 rounded-sm bg-slate-800"></span>
+          <span class="text-sm tracking-tight">NATIONAL ABHA GRID</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INSIGHTS & CLINICAL NEWS GRID ================= -->
+  <section id="insights" class="py-24 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-16 gap-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-2 block">Research &amp; Field Studies</span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy tracking-tight font-sans">
+            What's moving in healthcare continuity.
+          </h2>
+        </div>
+        <a href="#demo" class="text-sm font-semibold text-brand-blue hover:text-brand-navy flex items-center gap-1">
+          View all whitepapers →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Article 1 -->
+        <article class="group cursor-pointer">
+          <div class="bg-slate-100 rounded-xl overflow-hidden aspect-[16/10] mb-5 border border-slate-200/80 relative flex items-center justify-center p-6 bg-gradient-to-br from-slate-100 to-blue-50/50">
+            <div class="text-xs font-mono text-slate-400 uppercase tracking-widest">CLINICAL STUDY · Q1 2026</div>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-slate-500 font-mono mb-2">
+            <span>MARCH 2026</span>
+            <span>·</span>
+            <span class="text-brand-blue font-semibold">FHIR R4 PROTOCOL</span>
+          </div>
+          <h3 class="text-lg font-bold text-brand-navy group-hover:text-brand-blue transition-colors leading-snug">
+            Reducing 30-Day Congestive Heart Failure Readmissions via Automated Bi-directional Care Loops.
+          </h3>
+          <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+            Multi-center field analysis across 14 rural primary health centers demonstrating a 38% reduction in avoidable emergency re-admissions.
+          </p>
+        </article>
+
+        <!-- Article 2 -->
+        <article class="group cursor-pointer">
+          <div class="bg-slate-100 rounded-xl overflow-hidden aspect-[16/10] mb-5 border border-slate-200/80 relative flex items-center justify-center p-6 bg-gradient-to-br from-slate-100 to-purple-50/50">
+            <div class="text-xs font-mono text-purple-400 uppercase tracking-widest">EXPLAINABLE AI · SHAP</div>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-slate-500 font-mono mb-2">
+            <span>FEBRUARY 2026</span>
+            <span>·</span>
+            <span class="text-purple-700 font-semibold">ALGORITHMIC ETHICS</span>
+          </div>
+          <h3 class="text-lg font-bold text-brand-navy group-hover:text-purple-700 transition-colors leading-snug">
+            Why We Enforce Human-in-the-Loop Verification for All Enterprise Master Patient Index Merges.
+          </h3>
+          <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+            How CareBridge balances probabilistic phonetic match engines with clinician sign-off to maintain zero demographic false-merges.
+          </p>
+        </article>
+
+        <!-- Article 3 -->
+        <article class="group cursor-pointer">
+          <div class="bg-slate-100 rounded-xl overflow-hidden aspect-[16/10] mb-5 border border-slate-200/80 relative flex items-center justify-center p-6 bg-gradient-to-br from-slate-100 to-emerald-50/50">
+            <div class="text-xs font-mono text-emerald-500 uppercase tracking-widest">OFFLINE INFRASTRUCTURE</div>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-slate-500 font-mono mb-2">
+            <span>JANUARY 2026</span>
+            <span>·</span>
+            <span class="text-emerald-700 font-semibold">RESILIENT SYNC</span>
+          </div>
+          <h3 class="text-lg font-bold text-brand-navy group-hover:text-emerald-700 transition-colors leading-snug">
+            Designing for Disconnected Realities: Cryptographic Mesh Queues in Remote Clinical Fieldwork.
+          </h3>
+          <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+            Architectural teardown of our Flutter and Drift local database engine preserving state over intermittent cellular infrastructure.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MINIMAL EDITORIAL FAQ ================= -->
+  <section class="py-24 bg-[#FAFAFC] border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-brand-blue mb-2 block">Common Questions</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-brand-navy tracking-tight font-sans">
+          Frequently Asked Questions
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Q1 -->
+        <details class="bg-white rounded-xl border border-slate-200 p-6 group cursor-pointer" open>
+          <summary class="font-bold text-brand-navy flex items-center justify-between list-none text-base sm:text-lg">
+            <span>How does CareBridge AI integrate with existing hospital EHR systems?</span>
+            <span class="text-brand-blue group-open:rotate-180 transition-transform duration-200">↓</span>
+          </summary>
+          <p class="text-slate-600 text-sm leading-relaxed mt-4 pt-4 border-t border-slate-100">
+            CareBridge AI connects natively via standardized HL7 FHIR R4 interfaces, supporting automated bundle ingestion, MedicationStatement generation, and ABDM health ID validation without altering your existing clinical database schema.
+          </p>
+        </details>
+
+        <!-- Q2 -->
+        <details class="bg-white rounded-xl border border-slate-200 p-6 group cursor-pointer">
+          <summary class="font-bold text-brand-navy flex items-center justify-between list-none text-base sm:text-lg">
+            <span>What happens if the primary health center has no active internet connection?</span>
+            <span class="text-brand-blue group-open:rotate-180 transition-transform duration-200">↓</span>
+          </summary>
+          <p class="text-slate-600 text-sm leading-relaxed mt-4 pt-4 border-t border-slate-100">
+            Our Android mobile client utilizes an offline-first architecture powered by Drift and SQLite. Field nurses can register intake, update patient vitals, and complete appointments completely offline. Cryptographic peer sync executes seamlessly as soon as cellular data or Wi-Fi reconnects.
+          </p>
+        </details>
+
+        <!-- Q3 -->
+        <details class="bg-white rounded-xl border border-slate-200 p-6 group cursor-pointer">
+          <summary class="font-bold text-brand-navy flex items-center justify-between list-none text-base sm:text-lg">
+            <span>Is patient identity reconciliation fully automated by machine learning?</span>
+            <span class="text-brand-blue group-open:rotate-180 transition-transform duration-200">↓</span>
+          </summary>
+          <p class="text-slate-600 text-sm leading-relaxed mt-4 pt-4 border-t border-slate-100">
+            No. By clinical safety design, CareBridge enforces a strict human-in-the-loop policy. While our model scores candidate matches with confidence indices, a human clinician or medical record specialist must explicitly review discrepancies and click 'Confirm &amp; Link' before any medical record linkage occurs.
+          </p>
+        </details>
+
+        <!-- Q4 -->
+        <details class="bg-white rounded-xl border border-slate-200 p-6 group cursor-pointer">
+          <summary class="font-bold text-brand-navy flex items-center justify-between list-none text-base sm:text-lg">
+            <span>How are 30-day readmission risk factors explained to attending physicians?</span>
+            <span class="text-brand-blue group-open:rotate-180 transition-transform duration-200">↓</span>
+          </summary>
+          <p class="text-slate-600 text-sm leading-relaxed mt-4 pt-4 border-t border-slate-100">
+            Alongside each probability score, the platform renders a calibrated SHAP (SHapley Additive exPlanations) visual contribution bar chart. This clearly shows physicians which factors (e.g., polypharmacy, recent emergency admissions, elevated blood pressure) contributed positively to risk, and which protective behaviors mitigated it.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLOSING FULL-WIDTH STATEMENT CTA BAND ================= -->
+  <section id="demo" class="py-24 lg:py-32 bg-brand-navy text-white relative overflow-hidden">
+    <!-- Faint background geometric grid -->
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38BDF8_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
+
+    <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest bg-blue-900/60 text-blue-300 mb-8 border border-blue-700/50">
+        CodeX 2026 Ready Platform
+      </div>
+
+      <h2 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-8 font-sans leading-tight">
+        Ready to close the loop<br/>
+        <span class="font-editorial italic font-normal text-sky-200">on patient care?</span>
+      </h2>
+
+      <p class="text-lg sm:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto mb-10">
+        Deploy clinical-grade referral continuity across your healthcare network. Connect tertiary hospital discharge with community clinics in days.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="mailto:demo@carebridge.ai" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-bold bg-brand-blue text-white hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl">
+          Schedule Clinical Architecture Demo
+        </a>
+        <a href="#platform" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-semibold border border-slate-700 text-slate-200 hover:bg-slate-800 transition-all">
+          Explore Technical Specs
+        </a>
+      </div>
+
+      <div class="mt-12 text-xs text-slate-400 font-mono">
+        HIPAA &amp; ABDM COMPLIANT · HL7 FHIR R4 CERTIFIED · OFFLINE ENCRYPTED MESH
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MULTI-COLUMN EDITORIAL FOOTER ================= -->
+  <footer class="bg-[#070D18] text-slate-400 text-xs py-16 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-10 pb-16 border-b border-slate-800">
+        
+        <!-- Brand Summary -->
+        <div class="col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-6 h-6 rounded bg-brand-blue flex items-center justify-center text-white font-bold text-xs">C</div>
+            <span class="text-base font-bold text-white tracking-tight">CareBridge AI</span>
+          </div>
+          <p class="text-slate-400 leading-relaxed max-w-sm mb-6">
+            The national healthcare continuity platform connecting hospital emergency &amp; inpatient discharge with primary healthcare centers.
+          </p>
+          <div class="font-mono text-[11px] text-slate-500">
+            CareBridge AI Production Gateway v1.0.0-codex-demo<br/>
+            Connected to National Unified Health Backbone
+          </div>
+        </div>
+
+        <!-- Platform Links -->
+        <div>
+          <h4 class="text-slate-200 font-bold uppercase tracking-wider mb-4 text-[11px]">Platform</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#platform" class="hover:text-white transition-colors">Referral Queue</a></li>
+            <li><a href="#platform" class="hover:text-white transition-colors">Identity Reconciliation</a></li>
+            <li><a href="#platform" class="hover:text-white transition-colors">Readmission AI Model</a></li>
+            <li><a href="#platform" class="hover:text-white transition-colors">OCR Field Ingestion</a></li>
+            <li><a href="#platform" class="hover:text-white transition-colors">Offline Sync Engine</a></li>
+          </ul>
+        </div>
+
+        <!-- Operating Regions -->
+        <div>
+          <h4 class="text-slate-200 font-bold uppercase tracking-wider mb-4 text-[11px]">Active Regions</h4>
+          <ul class="space-y-2.5">
+            <li><span class="text-slate-300">Maharashtra Cluster</span></li>
+            <li><span class="text-slate-300">Karnataka PHC Grid</span></li>
+            <li><span class="text-slate-300">Delhi NCR Hospitals</span></li>
+            <li><span class="text-slate-300">Tamil Nadu Network</span></li>
+            <li><span class="text-slate-300">Telangana Nodes</span></li>
+          </ul>
+        </div>
+
+        <!-- Compliance & Security -->
+        <div>
+          <h4 class="text-slate-200 font-bold uppercase tracking-wider mb-4 text-[11px]">Governance</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="hover:text-white transition-colors">FHIR R4 Implementation</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">ABDM Certification</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Clinical Audit Logs</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Privacy &amp; Security</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">System Status</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-slate-500 gap-4">
+        <p>© 2026 CareBridge AI Systems. All rights reserved. CodeX 2026 Competition Build.</p>
+        <div class="flex items-center gap-6">
+          <a href="#" class="hover:text-slate-300">Terms of Care</a>
+          <a href="#" class="hover:text-slate-300">Security Architecture</a>
+          <a href="#" class="hover:text-slate-300">Clinical Guidelines</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= JAVASCRIPT: PRELOADER, COUNTER ANIMATIONS ================= -->
+  <script>
+    // Preloader countdown simulation
+    window.addEventListener('DOMContentLoaded', () => {
+      const preloader = document.getElementById('preloader');
+      const counter = document.getElementById('loaderCount');
+      let progress = 0;
+      
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 18) + 8;
+        if (progress >= 100) {
+          progress = 100;
+          counter.textContent = '100';
+          clearInterval(interval);
+          setTimeout(() => {
+            preloader.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => preloader.remove(), 700);
+          }, 350);
+        } else {
+          counter.textContent = progress.toString().padStart(2, '0');
+        }
+      }, 50);
+
+      // Stat counter reveal on scroll
+      const statElements = document.querySelectorAll('.stat-number');
+      let statsAnimated = false;
+
+      const animateStats = () => {
+        statElements.forEach(el => {
+          const target = parseFloat(el.getAttribute('data-target'));
+          const isFloat = el.getAttribute('data-target').includes('.');
+          let current = 0;
+          const duration = 1200;
+          const stepTime = 20;
+          const steps = duration / stepTime;
+          const increment = target / steps;
+
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              current = target;
+              clearInterval(timer);
+              el.textContent = isFloat ? target.toFixed(1) : Math.round(target).toLocaleString();
+            } else {
+              el.textContent = isFloat ? current.toFixed(1) : Math.round(current).toLocaleString();
+            }
+          }, stepTime);
+        });
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !statsAnimated) {
+            statsAnimated = true;
+            animateStats();
+          }
+        });
+      }, { threshold: 0.3 });
+
+      const statsSection = document.querySelector('.stat-number');
+      if (statsSection) {
+        observer.observe(statsSection.closest('section'));
+      }
+    });
+  </script>
+</body>
+</html>

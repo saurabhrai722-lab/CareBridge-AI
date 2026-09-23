@@ -18,7 +18,16 @@ from backend.schemas import (
     ReferralEventResponse
 )
 
+from fastapi.responses import FileResponse
+import pathlib
+
 app = FastAPI(title="CareBridge AI Backend")
+
+# Serve the landing page at the root route
+@app.get("/")
+async def serve_landing_page():
+    landing_page_path = pathlib.Path(__file__).parent.parent / "apps" / "landing" / "index.html"
+    return FileResponse(str(landing_page_path))
 
 # Phase 10 Overdue configuration
 OVERDUE_THRESHOLD_HOURS = 48
